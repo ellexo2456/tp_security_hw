@@ -138,16 +138,22 @@ func (h *Handler) getTlsConfig(host string) (*tls.Config, error) {
 		return nil, err
 	}
 
+	h.mu.RLock()
+	defer h.mu.RUnlock()
 	c, err := tls.X509KeyPair(h.certs[host], key)
 	if err != nil {
 		return nil, err
 	}
+
 	return &tls.Config{
 		Certificates: []tls.Certificate{c},
 	}, nil
 }
 
 func (h *Handler) addCert(host string) error {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	if _, exists := h.certs[host]; exists {
 		return nil
 	}
