@@ -133,7 +133,7 @@ func (h *Handler) getTlsConfig(host string) (*tls.Config, error) {
 		return nil, err
 	}
 
-	key, err := os.ReadFile("/src/list/ca.key")
+	key, err := os.ReadFile("./src/certs/cert.key")
 	if err != nil {
 		return nil, err
 	}
