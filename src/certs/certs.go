@@ -28,7 +28,7 @@ func Load() (map[string][]byte, error) {
 }
 
 func Generate(host string) ([]byte, error) {
-	c, err := exec.Command("./gen_cert.sh", host, strconv.Itoa(rand.Intn(1000000000000))).Output()
+	c, err := exec.Command("./src/certs/gen_cert.sh", host, strconv.Itoa(rand.Intn(1000000000000))).Output()
 	if err != nil {
 		return nil, err
 	}

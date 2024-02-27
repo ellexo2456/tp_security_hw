@@ -70,7 +70,7 @@ func (h *Handler) makeExchange(source, dest net.Conn, req *http.Request) error {
 }
 
 func (h *Handler) makeConnection(req *http.Request, source net.Conn) (net.Conn, error) {
-	host := req.URL.Host
+	host := req.URL.Hostname()
 	port := utils.GetPort(req)
 
 	if req.Method != "CONNECT" {
