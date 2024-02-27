@@ -1,4 +1,4 @@
 ca.crt
 ca.key
 cert.key
-./src/certs/list/*
+list*
