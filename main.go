@@ -44,12 +44,12 @@ import (
 //
 //}
 
-const host = 8080
+const port = 8080
 
 func main() {
 	h, err := handler.New()
 	if err != nil {
 		log.Fatal(err)
 	}
-	proxy.StartServer(host, h.Handle)
+	proxy.StartServer(port, h.Handle)
 }

@@ -50,7 +50,7 @@ func (h *Handler) Handle(source net.Conn) error {
 	}(dest)
 
 	req.Header.Del("Proxy-Connection")
-	req.RequestURI = req.URL.Path
+	//req.RequestURI = req.URL.Path
 
 	return h.makeExchange(source, dest, req)
 }

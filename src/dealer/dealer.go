@@ -35,14 +35,14 @@ func SendRequest(conn net.Conn, req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
-	fmt.Print("\n\n\n\n")
+	fmt.Print("\n\n")
 	fmt.Println("###############################################################")
 	fmt.Println("###############################################################")
 	fmt.Println("############################REQUEST############################")
 	fmt.Println("###############################################################")
 	fmt.Println("###############################################################")
 	req.Write(os.Stdout)
-	fmt.Print("\n\n\n\n")
+	fmt.Print("\n\n")
 	return http.ReadResponse(bufio.NewReader(conn), req)
 }
 
@@ -51,14 +51,14 @@ func WriteResponse(conn net.Conn, resp *http.Response) error {
 	if err != nil {
 		return err
 	}
-	fmt.Print("\n\n\n\n")
+	fmt.Print("\n\n")
 	fmt.Println("###############################################################")
 	fmt.Println("###############################################################")
 	fmt.Println("############################RESPONSE############################")
 	fmt.Println("###############################################################")
 	fmt.Println("###############################################################")
 	resp.Write(os.Stdout)
-	fmt.Print("\n\n\n\n")
+	fmt.Print("\n\n")
 
 	return nil
 }
