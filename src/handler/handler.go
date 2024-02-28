@@ -3,7 +3,6 @@ package handler
 import (
 	"bufio"
 	"crypto/tls"
-	"fmt"
 	"github.com/ellexo2456/tp_security_hw/src/dealer"
 	"github.com/ellexo2456/tp_security_hw/src/utils"
 	"net"
@@ -38,16 +37,16 @@ func (h *Handler) Handle(source net.Conn) error {
 		return err
 	}
 
-	dest, err := h.makeConnection(req, source)
+	dest, source, err := h.makeConnection(req, source)
 	if err != nil {
 		return err
 	}
-	defer func(dest net.Conn) {
-		err := dest.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(dest)
+	//defer func(dest net.Conn) {
+	//	err := dest.Close()
+	//	if err != nil {
+	//		fmt.Println(err)
+	//	}
+	//}(dest)
 
 	req.Header.Del("Proxy-Connection")
 	//req.RequestURI = req.URL.Path
@@ -61,6 +60,8 @@ func (h *Handler) makeExchange(source, dest net.Conn, req *http.Request) error {
 		return err
 	}
 
+	defer resp.Body.Close()
+
 	err = dealer.WriteResponse(source, resp)
 	if err != nil {
 		return err
@@ -69,54 +70,54 @@ func (h *Handler) makeExchange(source, dest net.Conn, req *http.Request) error {
 	return nil
 }
 
-func (h *Handler) makeConnection(req *http.Request, source net.Conn) (net.Conn, error) {
+func (h *Handler) makeConnection(req *http.Request, source net.Conn) (net.Conn, net.Conn, error) {
 	host := req.URL.Hostname()
 	port := utils.GetPort(req)
 
 	if req.Method != "CONNECT" {
-		return h.makeTcp(req, host, port)
+		return h.makeTcp(req, source, host, port)
 	}
 	if req.Method == "CONNECT" {
 		return h.makeTls(req, source, host, port)
 	}
 
-	return nil, nil
+	return nil, nil, nil
 }
 
-func (h *Handler) makeTcp(req *http.Request, host, port string) (net.Conn, error) {
+func (h *Handler) makeTcp(req *http.Request, src net.Conn, host, port string) (net.Conn, net.Conn, error) {
 	req.URL.Scheme = "http"
 	dest, err := dealer.TcpConnect(host, port)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return dest, nil
+	return dest, src, nil
 }
 
-func (h *Handler) makeTls(req *http.Request, source net.Conn, host, port string) (net.Conn, error) {
+func (h *Handler) makeTls(req *http.Request, source net.Conn, host, port string) (net.Conn, net.Conn, error) {
 	_, err := source.Write([]byte("HTTP/1.0 200 Connection established\n\n"))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	source, err = h.upgradeToTls(source, host)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	r, err := http.ReadRequest(bufio.NewReader(source))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	*req = *r
 
 	//req.URL.Scheme = "https"
 	dest, err := dealer.TlsConnect(host, port)
 	if err != nil {
-		return dest, err
+		return nil, nil, err
 	}
 
-	return dest, nil
+	return dest, source, nil
 }
 
 func (h *Handler) upgradeToTls(conn net.Conn, host string) (net.Conn, error) {
