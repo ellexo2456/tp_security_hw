@@ -3,6 +3,7 @@ package handler
 import (
 	"bufio"
 	"crypto/tls"
+	"fmt"
 	"github.com/ellexo2456/tp_security_hw/src/dealer"
 	"github.com/ellexo2456/tp_security_hw/src/utils"
 	"net"
@@ -41,16 +42,15 @@ func (h *Handler) Handle(source net.Conn) error {
 	if err != nil {
 		return err
 	}
-	//defer func(dest net.Conn) {
-	//	err := dest.Close()
-	//	if err != nil {
-	//		fmt.Println(err)
-	//	}
-	//}(dest)
+	defer func(dest net.Conn) {
+		err := dest.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(dest)
 
 	req.Header.Del("Proxy-Connection")
-	//req.RequestURI = req.URL.Path
-	req.URL.Host = ""
+	req.RequestURI = req.URL.Path
 	return h.makeExchange(source, dest, req)
 }
 
@@ -59,8 +59,6 @@ func (h *Handler) makeExchange(source, dest net.Conn, req *http.Request) error {
 	if err != nil {
 		return err
 	}
-
-	defer resp.Body.Close()
 
 	err = dealer.WriteResponse(source, resp)
 	if err != nil {
