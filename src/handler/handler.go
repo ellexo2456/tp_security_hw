@@ -51,7 +51,7 @@ func (h *Handler) Handle(source net.Conn) error {
 
 	req.Header.Del("Proxy-Connection")
 	//req.RequestURI = req.URL.Path
-
+	req.URL.Host = ""
 	return h.makeExchange(source, dest, req)
 }
 
@@ -94,7 +94,7 @@ func (h *Handler) makeTcp(req *http.Request, host, port string) (net.Conn, error
 }
 
 func (h *Handler) makeTls(req *http.Request, source net.Conn, host, port string) (net.Conn, error) {
-	_, err := source.Write([]byte("HTTP/1.0 200 Connection established\\req\\n\\req\\n"))
+	_, err := source.Write([]byte("HTTP/1.0 200 Connection established\n\n"))
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,13 @@ func (h *Handler) makeTls(req *http.Request, source net.Conn, host, port string)
 		return nil, err
 	}
 
-	req.URL.Scheme = "https"
+	r, err := http.ReadRequest(bufio.NewReader(source))
+	if err != nil {
+		return nil, err
+	}
+	*req = *r
+
+	//req.URL.Scheme = "https"
 	dest, err := dealer.TlsConnect(host, port)
 	if err != nil {
 		return dest, err

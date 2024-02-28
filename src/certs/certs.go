@@ -1,10 +1,8 @@
 package certs
 
 import (
-	"math/rand"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 )
 
@@ -28,7 +26,7 @@ func Load() (map[string][]byte, error) {
 }
 
 func Generate(host string) ([]byte, error) {
-	c, err := exec.Command("./src/certs/gen_cert.sh", host, strconv.Itoa(rand.Intn(1000000000000))).Output()
+	c, err := exec.Command("./src/certs/gen.sh", host).Output()
 	if err != nil {
 		return nil, err
 	}
