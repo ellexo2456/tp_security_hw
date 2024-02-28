@@ -4,11 +4,10 @@ import (
 	"bufio"
 	"context"
 	"crypto/tls"
-	"fmt"
 	"github.com/ellexo2456/tp_security_hw/src/utils"
 	"net"
 	"net/http"
-	"os"
+	"net/http/httputil"
 )
 
 func TlsConnect(host, port string) (net.Conn, error) {
@@ -47,18 +46,11 @@ func SendRequest(conn net.Conn, req *http.Request) (*http.Response, error) {
 }
 
 func WriteResponse(conn net.Conn, resp *http.Response) error {
-	err := resp.Write(conn)
+	bytes, err := httputil.DumpResponse(resp, true)
 	if err != nil {
 		return err
 	}
-	fmt.Print("\n\n")
-	fmt.Println("###############################################################")
-	fmt.Println("###############################################################")
-	fmt.Println("############################RESPONSE############################")
-	fmt.Println("###############################################################")
-	fmt.Println("###############################################################")
-	resp.Write(os.Stdout)
-	fmt.Print("\n\n")
 
-	return nil
+	_, err = conn.Write(bytes)
+	return err
 }
